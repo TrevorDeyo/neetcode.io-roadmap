@@ -1,6 +1,8 @@
 import heapq
 import random
 import time
+import tracemalloc
+from typing import List
 
 class Solution:
     def topKFrequent(self, nums: List[int], k: int) -> List[int]:
@@ -53,20 +55,30 @@ def generate_test_case(size: int, value_range: int, k: int):
     nums = [random.randint(0, value_range) for _ in range(size)]
     return nums, k
 
-def time_function(func, *args):
+def measure_performace(func, *args):
+    # Start timing and memory tracking
+    tracemalloc.start()
     start = time.perf_counter()
+
     result = func(*args)
+
     end = time.perf_counter()
-    return result, end - start
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    return {
+        "result": result,
+        "time": end - start,
+        "memory_peak_kb": peak / 1024
+    }
 
 sol = Solution()
+nums, k = generate_test_case(size=1000000, value_range=10000, k=100)
 
-nums, k = generate_test_case(size=100000, value_range=1000, k=10)
+perf_sorting = measure_performace(sol.topKFrequent, nums, k)
+perf_heap = measure_performace(sol.topKFrequentMinHeap, nums, k)
+perf_bucket = measure_performace(sol.topKFrequentBucketSort, nums, k)
 
-res1, t1 = time_function(sol.topKFrequent, nums, k)
-res2, t2 = time_function(sol.topKFrequentMinHeap, nums, k)
-res3, t3 = time_function(sol.topKFrequentBucketSort, nums, k)
-
-print(f"Sorting version:     {t1:.6f} seconds")
-print(f"Min-Heap version:    {t2:.6f} seconds")
-print(f"Bucket Sort version: {t3:.6f} seconds")
+print(f"Sorting version:     {perf_sorting['time']:.6f} s, {perf_sorting['memory_peak_kb']:.2f} KB peak")
+print(f"Min-Heap version:    {perf_heap['time']:.6f} s, {perf_heap['memory_peak_kb']:.2f} KB peak")
+print(f"Bucket Sort version: {perf_bucket['time']:.6f} s, {perf_bucket['memory_peak_kb']:.2f} KB peak")
