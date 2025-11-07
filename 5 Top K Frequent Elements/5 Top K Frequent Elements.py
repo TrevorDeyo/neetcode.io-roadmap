@@ -73,7 +73,7 @@ def measure_performace(func, *args):
     }
 
 sol = Solution()
-nums, k = generate_test_case(size=1000000, value_range=10000, k=100)
+nums, k = generate_test_case(size=1000000, value_range=100, k=10)
 
 perf_sorting = measure_performace(sol.topKFrequent, nums, k)
 perf_heap = measure_performace(sol.topKFrequentMinHeap, nums, k)
